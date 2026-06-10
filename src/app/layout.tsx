@@ -4,6 +4,8 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Sidebar from '@/components/Sidebar'
 import TopNav from '@/components/TopNav'
+import { SidebarProvider } from '@/components/ui/sidebar'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -20,7 +22,6 @@ export default async function RootLayout({
 }) {
   const cookieStore = await cookies()
   
-  // Authenticated layout validation
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -38,35 +39,33 @@ export default async function RootLayout({
     <html lang="en" className="h-full bg-[#0F0F0F] selection:bg-[#FFF200] selection:text-black">
       <body className={`${inter.className} h-full antialiased text-white bg-[#0F0F0F]`}>
         {user ? (
-          <div className="flex flex-col lg:flex-row min-h-screen overflow-hidden max-w-7xl mx-auto px-4 md:px-8 pt-6 pb-12 gap-8 relative z-10">
-            {/* Background Graphic Accents */}
-            <div className="absolute top-0 right-0 w-2/3 h-[500px] bg-red-600 opacity-10 transform rotate-12 translate-x-1/3 -translate-y-1/4 blur-3xl pointer-events-none z-0" />
-            
-            {/* Sidebar Left Component Column */}
-            <Sidebar />
+          <SidebarProvider>
+            <div className="flex h-screen w-screen overflow-hidden bg-[#0F0F0F] relative z-10">
+              {/* Sidebar */}
+              <Sidebar />
 
-            {/* Core Display Body Area */}
-            <div className="flex flex-col flex-1 min-w-0 z-10">
-              <TopNav />
-              <main className="flex-grow w-full relative mt-6">
-                <div className="bg-[#0F0F0F] border-4 border-white p-6 md:p-8 shadow-[12px_12px_0px_0px_#E60012] transform -skew-x-0.5 min-h-[550px] relative">
-                  {/* Decorative Header Accent */}
-                  <div className="absolute -top-3.5 -right-3.5 bg-[#FFF200] text-black font-black uppercase text-[9px] tracking-widest px-3 py-0.5 border-2 border-black transform rotate-2">
-                    Operational Grid Active
-                  </div>
-                  {/* Render Nested Children Views with Skew Counter-Correction */}
-                  <div className="transform skew-x-0.5 h-full w-full">
-                    {children}
-                  </div>
-                </div>
-              </main>
+              {/* Main (Scroll-column) */}
+              <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
+                <TopNav />
+                <ScrollArea className="flex-1 w-full h-full custom-scrollbar">
+                  <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar">
+                    <div className="bg-[#0F0F0F] border-4 border-white p-6 md:p-8 shadow-[12px_12px_0px_0px_#E60012] transform -skew-x-0.5 min-h-full relative mb-4">
+                      <div className="absolute -top-3.5 right-6 bg-[#FFF200] text-black font-black uppercase text-[9px] tracking-widest px-3 py-0.5 border-2 border-black transform rotate-2">
+                        Operational Control Base
+                      </div>
+                      <div className="transform skew-x-0.5 h-full w-full">
+                        {children}
+                      </div>
+                    </div>
+                  </main>
+                </ScrollArea>
+              </div>
             </div>
-          </div>
+          </SidebarProvider>
         ) : (
-          // Unauthenticated Flow View Wrapper (e.g. login screen)
-          <div className="h-screen overflow-y-auto">
+          <ScrollArea className="h-screen w-full">
             {children}
-          </div>
+          </ScrollArea>
         )}
       </body>
     </html>
